@@ -1,0 +1,30 @@
+{
+	"name": "ovgs",
+	"version": "0.1.0",
+	"description": "Sistema de Gestão de Ordens de Venda - desafio técnico full stack",
+	"private": true,
+	"workspaces": [
+		"apps/api",
+		"apps/web"
+	],
+	"scripts": {
+		"api:dev": "npm --workspace @ovgs/api run dev",
+		"web:dev": "npm --workspace @ovgs/web run dev",
+		"dev": "concurrently \"npm run api:dev\" \"npm run web:dev\"",
+		"build": "npm --workspace @ovgs/api run build && npm --workspace @ovgs/web run build",
+		"test": "npm --workspace @ovgs/api run test && npm --workspace @ovgs/web run test",
+		"lint": "npm --workspace @ovgs/api run lint && npm --workspace @ovgs/web run lint",
+		"prisma:generate": "npm --workspace @ovgs/api run prisma:generate",
+		"prisma:migrate": "npm --workspace @ovgs/api run prisma:migrate",
+		"prisma:seed": "npm --workspace @ovgs/api run prisma:seed",
+		"compose:up": "docker compose up -d postgres",
+		"compose:down": "docker compose down"
+	},
+	"engines": {
+		"node": ">=20",
+		"npm": ">=10"
+	},
+	"devDependencies": {
+		"concurrently": "^9.1.2"
+	}
+}
