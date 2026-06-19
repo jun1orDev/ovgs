@@ -59,15 +59,15 @@ async function main() {
 	}
 
 	const items = [
-		{ sku: 'SKU-001', name: 'Produto Exemplo 01', description: 'Item de demonstração' },
-		{ sku: 'SKU-002', name: 'Produto Exemplo 02', description: 'Item de demonstração' },
-		{ sku: 'SKU-003', name: 'Produto Exemplo 03', description: 'Item de demonstração' },
+		{ sku: 'SKU-001', name: 'Produto Exemplo 01', description: 'Item de demonstração', unitPrice: 125.5 },
+		{ sku: 'SKU-002', name: 'Produto Exemplo 02', description: 'Item de demonstração', unitPrice: 89.9 },
+		{ sku: 'SKU-003', name: 'Produto Exemplo 03', description: 'Item de demonstração', unitPrice: 210 },
 	];
 
 	for (const item of items) {
 		await prisma.item.upsert({
 			where: { sku: item.sku },
-			update: {},
+			update: { unitPrice: item.unitPrice },
 			create: item,
 		});
 	}
@@ -75,23 +75,38 @@ async function main() {
 	const firstItem = await prisma.item.findUnique({ where: { sku: 'SKU-001' } });
 
 	if (firstItem) {
-		await prisma.salesOrder.upsert({
+		const seededOrder = await prisma.salesOrder.upsert({
 			where: { number: 'OV-000001' },
-			update: {},
+			update: {
+				clientId: client.id,
+				transportTypeId: truck.id,
+				status: OrderStatus.CRIADA,
+			},
 			create: {
 				number: 'OV-000001',
 				clientId: client.id,
 				transportTypeId: truck.id,
 				status: OrderStatus.CRIADA,
-				items: {
-					create: [
-						{
-							itemId: firstItem.id,
-							quantity: 2,
-							unitPrice: 125.5,
-						},
-					],
+			},
+			select: { id: true },
+		});
+
+		await prisma.salesOrderItem.upsert({
+			where: {
+				salesOrderId_itemId: {
+					salesOrderId: seededOrder.id,
+					itemId: firstItem.id,
 				},
+			},
+			update: {
+				quantity: 2,
+				unitPrice: firstItem.unitPrice,
+			},
+			create: {
+				salesOrderId: seededOrder.id,
+				itemId: firstItem.id,
+				quantity: 2,
+				unitPrice: firstItem.unitPrice,
 			},
 		});
 	}

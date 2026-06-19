@@ -41,6 +41,7 @@ export class ItemsService {
 				id: true,
 				sku: true,
 				name: true,
+				unitPrice: true,
 			},
 		});
 

@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMinSize, IsArray, IsDateString, IsEnum, IsInt, IsNumber, IsOptional, IsUUID, Max, Min, ValidateNested } from 'class-validator';
+import { ArrayMinSize, IsArray, IsDateString, IsEnum, IsInt, IsOptional, IsUUID, Max, Min, ValidateNested } from 'class-validator';
 import { OrderStatus } from '../enums/order-status.enum';
 
 export class CreateSalesOrderItemDto {
@@ -13,12 +13,6 @@ export class CreateSalesOrderItemDto {
 	@IsInt()
 	@Min(1)
 	quantity?: number;
-
-	@ApiPropertyOptional({ example: 12.5 })
-	@IsOptional()
-	@IsNumber()
-	@Min(0)
-	unitPrice?: number;
 }
 
 export class CreateSalesOrderDto {

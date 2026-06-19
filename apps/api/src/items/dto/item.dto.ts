@@ -1,4 +1,5 @@
-import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsBoolean, IsNotEmpty, IsNumber, IsOptional, IsString, MaxLength, Min } from 'class-validator';
 
 export class CreateItemDto {
 	@IsNotEmpty()
@@ -15,6 +16,12 @@ export class CreateItemDto {
 	@IsString()
 	@MaxLength(500)
 	description?: string;
+
+	@IsOptional()
+	@Type(() => Number)
+	@IsNumber()
+	@Min(0)
+	unitPrice?: number;
 
 	@IsOptional()
 	@IsBoolean()
@@ -36,6 +43,12 @@ export class UpdateItemDto {
 	@IsString()
 	@MaxLength(500)
 	description?: string;
+
+	@IsOptional()
+	@Type(() => Number)
+	@IsNumber()
+	@Min(0)
+	unitPrice?: number;
 
 	@IsOptional()
 	@IsBoolean()

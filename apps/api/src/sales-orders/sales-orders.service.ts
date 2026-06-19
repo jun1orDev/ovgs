@@ -39,7 +39,8 @@ export class SalesOrdersService {
 			throw new BusinessRuleException('Tipo de transporte não autorizado para o cliente selecionado');
 		}
 
-		await this.itemsService.findExistingItems(dto.items.map((item) => item.itemId));
+		const items = await this.itemsService.findExistingItems(dto.items.map((item) => item.itemId));
+		const itemPriceById = new Map(items.map((item) => [item.id, item.unitPrice]));
 		const number = await this.generateOrderNumber();
 
 		const order = await this.prisma.salesOrder.create({
@@ -52,7 +53,7 @@ export class SalesOrdersService {
 					create: dto.items.map((item) => ({
 						itemId: item.itemId,
 						quantity: item.quantity ?? 1,
-						unitPrice: item.unitPrice,
+						unitPrice: itemPriceById.get(item.itemId),
 					})),
 				},
 			},

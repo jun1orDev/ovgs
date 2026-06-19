@@ -62,6 +62,7 @@ model Item {
   sku         String           @unique
   name        String
   description String?
+  unitPrice   Decimal          @default(0)
   active      Boolean          @default(true)
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
