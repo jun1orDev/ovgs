@@ -1,0 +1,68 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
+
+@Injectable()
+export class ItemsService {
+	constructor(private readonly prisma: PrismaService) { }
+
+	async create(dto: CreateItemDto) {
+		return this.prisma.item.create({ data: dto });
+	}
+
+	async findAll(active?: boolean) {
+		return this.prisma.item.findMany({
+			where: active !== undefined ? { active } : undefined,
+			orderBy: { name: 'asc' },
+		});
+	}
+
+	async findOne(id: string) {
+		return this.findOrThrow(id);
+	}
+
+	async update(id: string, dto: UpdateItemDto) {
+		await this.findOrThrow(id);
+		return this.prisma.item.update({ where: { id }, data: dto });
+	}
+
+	async remove(id: string) {
+		await this.findOrThrow(id);
+		return this.prisma.item.delete({ where: { id } });
+	}
+
+	async findExistingItems(itemIds: string[]) {
+		const items = await this.prisma.item.findMany({
+			where: {
+				id: { in: itemIds },
+				active: true,
+			},
+			select: {
+				id: true,
+				sku: true,
+				name: true,
+			},
+		});
+
+		const foundIds = new Set(
+			items.map((item: { id: string }) => item.id),
+		);
+		const missingIds = itemIds.filter((itemId) => !foundIds.has(itemId));
+
+		if (missingIds.length > 0) {
+			throw new NotFoundException(`Itens não encontrados: ${missingIds.join(', ')}`);
+		}
+
+		return items;
+	}
+
+	private async findOrThrow(id: string) {
+		const item = await this.prisma.item.findUnique({ where: { id } });
+
+		if (!item) {
+			throw new NotFoundException('Item não encontrado');
+		}
+
+		return item;
+	}
+}
