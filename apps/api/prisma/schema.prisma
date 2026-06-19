@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  CRIADA
+  PLANEJADA
+  AGENDADA
+  EM_TRANSPORTE
+  ENTREGUE
+}
+
+model Client {
+  id                  String                @id @default(uuid())
+  name                String
+  document            String?               @unique
+  email               String?               @unique
+  phone               String?
+  active              Boolean               @default(true)
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  salesOrders         SalesOrder[]
+  authorizedTransport ClientTransportType[]
+
+  @@index([name])
+  @@index([active])
+}
+
+model TransportType {
+  id          String                @id @default(uuid())
+  name        String                @unique
+  description String?
+  active      Boolean               @default(true)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  salesOrders SalesOrder[]
+  clients     ClientTransportType[]
+
+  @@index([active])
+}
+
+model ClientTransportType {
+  id              String        @id @default(uuid())
+  clientId        String
+  transportTypeId String
+  createdAt       DateTime      @default(now())
+
+  client        Client        @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  transportType TransportType @relation(fields: [transportTypeId], references: [id], onDelete: Cascade)
+
+  @@unique([clientId, transportTypeId])
+  @@index([transportTypeId])
+}
+
+model Item {
+  id          String           @id @default(uuid())
+  sku         String           @unique
+  name        String
+  description String?
+  active      Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  orderItems  SalesOrderItem[]
+
+  @@index([name])
+  @@index([active])
+}
+
+model SalesOrder {
+  id                String           @id @default(uuid())
+  number            String           @unique
+  clientId          String
+  transportTypeId   String
+  status            OrderStatus      @default(CRIADA)
+  deliveryDate      DateTime?
+  scheduleStart     DateTime?
+  scheduleEnd       DateTime?
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  client            Client           @relation(fields: [clientId], references: [id])
+  transportType     TransportType    @relation(fields: [transportTypeId], references: [id])
+  items             SalesOrderItem[]
+
+  @@index([clientId])
+  @@index([transportTypeId])
+  @@index([status])
+  @@index([deliveryDate])
+  @@index([createdAt])
+}
+
+model SalesOrderItem {
+  id           String     @id @default(uuid())
+  salesOrderId String
+  itemId       String
+  quantity     Int        @default(1)
+  unitPrice    Decimal?
+  createdAt    DateTime   @default(now())
+
+  salesOrder   SalesOrder @relation(fields: [salesOrderId], references: [id], onDelete: Cascade)
+  item         Item       @relation(fields: [itemId], references: [id])
+
+  @@unique([salesOrderId, itemId])
+  @@index([itemId])
+}
+
+model AuditEvent {
+  id              String   @id @default(uuid())
+  action          String
+  entityType      String
+  entityId        String
+  previousState   Json?
+  nextState       Json?
+  userId          String?
+  createdAt       DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}

@@ -8,7 +8,7 @@
 		"apps/web"
 	],
 	"scripts": {
-		"api:dev": "npm --workspace @ovgs/api run dev",
+		"api:dev": "npm --workspace @ovgs/api run start:dev",
 		"web:dev": "npm --workspace @ovgs/web run dev",
 		"dev": "concurrently \"npm run api:dev\" \"npm run web:dev\"",
 		"build": "npm --workspace @ovgs/api run build && npm --workspace @ovgs/web run build",
@@ -21,8 +21,8 @@
 		"compose:down": "docker compose down"
 	},
 	"engines": {
-		"node": ">=20",
-		"npm": ">=10"
+		"node": ">=24.17.0",
+		"npm": ">=11.13.0"
 	},
 	"devDependencies": {
 		"concurrently": "^9.1.2"
