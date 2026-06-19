@@ -5,6 +5,7 @@ import { BusinessRuleException } from '../common/exceptions/business-rule.except
 import { OrderStatus } from '../sales-orders/enums/order-status.enum';
 import { SalesOrdersService } from '../sales-orders/sales-orders.service';
 import { RescheduleSalesOrderDto, ScheduleSalesOrderDto } from './dto/scheduling.dto';
+import { assertScheduleWindow } from './schedule-window';
 
 @Injectable()
 export class SchedulingService {
@@ -20,7 +21,7 @@ export class SchedulingService {
 			throw new BusinessRuleException('Somente ordens planejadas ou agendadas podem ser agendadas');
 		}
 
-		this.assertScheduleWindow(dto.deliveryDate, dto.scheduleStart, dto.scheduleEnd);
+		assertScheduleWindow(dto.scheduleStart, dto.scheduleEnd);
 
 		const updated = await this.salesOrdersService.updateSchedule(orderId, dto);
 
@@ -46,13 +47,17 @@ export class SchedulingService {
 			throw new BusinessRuleException('Somente ordens agendadas ou em transporte podem ser reagendadas');
 		}
 
+		if (!order.deliveryDate || !order.scheduleStart || !order.scheduleEnd) {
+			throw new BusinessRuleException('Ordem precisa estar agendada antes de ser reagendada');
+		}
+
 		const nextDto: ScheduleSalesOrderDto = {
-			deliveryDate: dto.deliveryDate ?? order.deliveryDate!.toISOString().slice(0, 10),
-			scheduleStart: dto.scheduleStart ?? this.toTime(order.scheduleStart!),
-			scheduleEnd: dto.scheduleEnd ?? this.toTime(order.scheduleEnd!),
+			deliveryDate: dto.deliveryDate ?? order.deliveryDate.toISOString().slice(0, 10),
+			scheduleStart: dto.scheduleStart ?? this.toTime(order.scheduleStart),
+			scheduleEnd: dto.scheduleEnd ?? this.toTime(order.scheduleEnd),
 		};
 
-		this.assertScheduleWindow(nextDto.deliveryDate, nextDto.scheduleStart, nextDto.scheduleEnd);
+		assertScheduleWindow(nextDto.scheduleStart, nextDto.scheduleEnd);
 
 		const updated = await this.salesOrdersService.updateSchedule(orderId, {
 			deliveryDate: nextDto.deliveryDate,
@@ -73,21 +78,6 @@ export class SchedulingService {
 		});
 
 		return updated;
-	}
-
-	private assertScheduleWindow(deliveryDate: string, scheduleStart: string, scheduleEnd: string): void {
-		const [startHour, startMinute] = scheduleStart.split(':').map(Number);
-		const [endHour, endMinute] = scheduleEnd.split(':').map(Number);
-		const start = startHour * 60 + startMinute;
-		const end = endHour * 60 + endMinute;
-
-		if (end <= start) {
-			throw new BusinessRuleException('Janela de atendimento inválida: horário final deve ser posterior ao horário inicial');
-		}
-
-		if (start < 8 * 60 || end > 18 * 60) {
-			throw new BusinessRuleException('Janela de atendimento deve estar entre 08:00 e 18:00');
-		}
 	}
 
 	private toTime(date: Date): string {
