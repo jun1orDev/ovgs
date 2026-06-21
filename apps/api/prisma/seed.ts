@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { OrderStatus } from '../src/sales-orders/enums/order-status.enum';
+import { OrderStatus } from '../src/domain/sales-orders/enums/order-status.enum';
 
 const prisma = new PrismaClient();
 
