@@ -7,4 +7,3 @@ export class ConfigModule {
 		return NestConfigModule.forRoot(options);
 	}
 }
-
