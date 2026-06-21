@@ -8,6 +8,7 @@ export default function ClientsPage() {
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     document: '',
@@ -37,25 +38,62 @@ export default function ClientsPage() {
     loadClients();
   }, []);
 
+  function resetForm() {
+    setForm({
+      name: '',
+      document: '',
+      email: '',
+      phone: '',
+      active: true,
+      transportTypeIds: [],
+    });
+    setEditingId(null);
+  }
+
+  function startEdit(client: Client) {
+    setForm({
+      name: client.name,
+      document: client.document ?? '',
+      email: client.email ?? '',
+      phone: client.phone ?? '',
+      active: client.active,
+      transportTypeIds: client.authorizedTransport?.map((at) => at.transportTypeId) ?? [],
+    });
+    setEditingId(client.id);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage('');
 
     try {
-      await apiClient.clients.create({
-        ...form,
-        transportTypeIds: form.transportTypeIds,
-      });
-      setForm({
-        name: '',
-        document: '',
-        email: '',
-        phone: '',
-        active: true,
-        transportTypeIds: [],
-      });
+      if (editingId) {
+        await apiClient.clients.update(editingId, {
+          ...form,
+          transportTypeIds: form.transportTypeIds,
+        });
+        setMessage('Cliente atualizado com sucesso.');
+      } else {
+        await apiClient.clients.create({
+          ...form,
+          transportTypeIds: form.transportTypeIds,
+        });
+        setMessage('Cliente cadastrado com sucesso.');
+      }
+      resetForm();
       await loadClients();
-      setMessage('Cliente cadastrado com sucesso.');
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir este cliente?')) return;
+
+    try {
+      await apiClient.clients.remove(id);
+      await loadClients();
+      setMessage('Cliente excluído com sucesso.');
     } catch (error) {
       setMessage(getErrorMessage(error));
     }
@@ -82,7 +120,7 @@ export default function ClientsPage() {
       <div className="clients-layout">
         <div className="two-columns">
           <form className="card form-card clients-form-card" onSubmit={handleSubmit}>
-            <h2>Novo cliente</h2>
+            <h2>{editingId ? 'Editar cliente' : 'Novo cliente'}</h2>
 
             <label>
               Nome *
@@ -146,44 +184,53 @@ export default function ClientsPage() {
               </div>
             </fieldset>
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar cliente'}
-            </button>
+            <div className="form-actions">
+              <button type="submit" disabled={loading}>
+                {loading ? 'Salvando...' : editingId ? 'Atualizar cliente' : 'Salvar cliente'}
+              </button>
+              {editingId && (
+                <button type="button" className="secondary" onClick={resetForm}>
+                  Cancelar
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="card clients-list-card">
-          <h2>Clientes cadastrados</h2>
-          {clients.length === 0 ? (
-            <p className="empty">Nenhum cliente cadastrado.</p>
-          ) : (
-            <ul className="list clients-list">
-              {clients.map((client) => (
-                <li key={client.id}>
-                  <div>
-                    <strong>{client.name}</strong>
-                    <span>{client.document ?? 'Sem documento'}</span>
-                  </div>
-                  <div>
-                    <span className={client.active ? 'badge-active' : 'badge-inactive'}>
-                      {client.active ? 'Ativo' : 'Inativo'}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+            <h2>Clientes cadastrados</h2>
+            {clients.length === 0 ? (
+              <p className="empty">Nenhum cliente cadastrado.</p>
+            ) : (
+              <ul className="list clients-list">
+                {clients.map((client) => (
+                  <li key={client.id}>
+                    <div>
+                      <strong>{client.name}</strong>
+                      <span>{client.document ?? 'Sem documento'}</span>
+                    </div>
+                    <div className="clients-actions">
+                      <span className={client.active ? 'badge-active' : 'badge-inactive'}>
+                        {client.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                      <button className="secondary" onClick={() => startEdit(client)}>Editar</button>
+                      <button className="secondary" onClick={() => handleDelete(client.id)}>Excluir</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
-      </div>
 
-      <div className="card clients-transport-card">
-        <h2>Tipos de transporte disponíveis</h2>
-        <div className="chip-list">
-          {transportTypes.map((transportType) => (
-            <span key={transportType.id} className="chip">{optionLabel(transportType)}</span>
-          ))}
+        <div className="card clients-transport-card">
+          <h2>Tipos de transporte disponíveis</h2>
+          <div className="chip-list">
+            {transportTypes.map((transportType) => (
+              <span key={transportType.id} className="chip">{optionLabel(transportType)}</span>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
     </section>
   );
 }

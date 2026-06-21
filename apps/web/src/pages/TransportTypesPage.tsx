@@ -7,6 +7,7 @@ export default function TransportTypesPage() {
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     description: '',
@@ -28,15 +29,46 @@ export default function TransportTypesPage() {
     loadTransportTypes();
   }, []);
 
+  function resetForm() {
+    setForm({ name: '', description: '', active: true });
+    setEditingId(null);
+  }
+
+  function startEdit(transportType: TransportType) {
+    setForm({
+      name: transportType.name,
+      description: transportType.description ?? '',
+      active: transportType.active,
+    });
+    setEditingId(transportType.id);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage('');
 
     try {
-      await apiClient.transportTypes.create(form);
-      setForm({ name: '', description: '', active: true });
+      if (editingId) {
+        await apiClient.transportTypes.update(editingId, form);
+        setMessage('Tipo de transporte atualizado com sucesso.');
+      } else {
+        await apiClient.transportTypes.create(form);
+        setMessage('Tipo de transporte cadastrado com sucesso.');
+      }
+      resetForm();
       await loadTransportTypes();
-      setMessage('Tipo de transporte cadastrado com sucesso.');
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir este tipo de transporte?')) return;
+
+    try {
+      await apiClient.transportTypes.remove(id);
+      await loadTransportTypes();
+      setMessage('Tipo de transporte excluído com sucesso.');
     } catch (error) {
       setMessage(getErrorMessage(error));
     }
@@ -54,7 +86,7 @@ export default function TransportTypesPage() {
       <div className="transport-types-layout">
         <div className="two-columns">
           <form className="card form-card transport-types-form-card" onSubmit={handleSubmit}>
-            <h2>Novo tipo de transporte</h2>
+            <h2>{editingId ? 'Editar tipo de transporte' : 'Novo tipo de transporte'}</h2>
 
             <label>
               Nome *
@@ -84,33 +116,44 @@ export default function TransportTypesPage() {
               Ativo
             </label>
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar tipo de transporte'}
-            </button>
+            <div className="form-actions">
+              <button type="submit" disabled={loading}>
+                {loading ? 'Salvando...' : editingId ? 'Atualizar tipo de transporte' : 'Salvar tipo de transporte'}
+              </button>
+              {editingId && (
+                <button type="button" className="secondary" onClick={resetForm}>
+                  Cancelar
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="card transport-types-list-card">
-          <h2>Tipos cadastrados</h2>
-          {transportTypes.length === 0 ? (
-            <p className="empty">Nenhum tipo de transporte cadastrado.</p>
-          ) : (
-            <ul className="list transport-types-list">
-              {transportTypes.map((transportType) => (
-                <li key={transportType.id}>
-                  <div>
-                    <strong>{transportType.name}</strong>
-                    <span>{transportType.description ?? 'Sem descrição'}</span>
-                  </div>
-                  <span className={transportType.active ? 'badge-active' : 'badge-inactive'}>
-                    {transportType.active ? 'Ativo' : 'Inativo'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+            <h2>Tipos cadastrados</h2>
+            {transportTypes.length === 0 ? (
+              <p className="empty">Nenhum tipo de transporte cadastrado.</p>
+            ) : (
+              <ul className="list transport-types-list">
+                {transportTypes.map((transportType) => (
+                  <li key={transportType.id}>
+                    <div>
+                      <strong>{transportType.name}</strong>
+                      <span>{transportType.description ?? 'Sem descrição'}</span>
+                    </div>
+                    <div className="transport-types-actions">
+                      <span className={transportType.active ? 'badge-active' : 'badge-inactive'}>
+                        {transportType.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                      <button className="secondary" onClick={() => startEdit(transportType)}>Editar</button>
+                      <button className="secondary" onClick={() => handleDelete(transportType.id)}>Excluir</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </section>
   );
 }

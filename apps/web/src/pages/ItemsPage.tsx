@@ -22,6 +22,7 @@ export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     sku: '',
     name: '',
@@ -45,18 +46,55 @@ export default function ItemsPage() {
     loadItems();
   }, []);
 
+  function resetForm() {
+    setForm({ sku: '', name: '', description: '', unitPrice: 'R$ 0,00', active: true });
+    setEditingId(null);
+  }
+
+  function startEdit(item: Item) {
+    const unitPriceNumber = typeof item.unitPrice === 'number' ? item.unitPrice : Number(item.unitPrice ?? 0);
+    setForm({
+      sku: item.sku,
+      name: item.name,
+      description: item.description ?? '',
+      unitPrice: formatCurrencyInput(String(unitPriceNumber * 100)),
+      active: item.active,
+    });
+    setEditingId(item.id);
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage('');
 
     try {
-      await apiClient.items.create({
-        ...form,
-        unitPrice: parseCurrency(form.unitPrice),
-      });
-      setForm({ sku: '', name: '', description: '', unitPrice: 'R$ 0,00', active: true });
+      if (editingId) {
+        await apiClient.items.update(editingId, {
+          ...form,
+          unitPrice: parseCurrency(form.unitPrice),
+        });
+        setMessage('Item atualizado com sucesso.');
+      } else {
+        await apiClient.items.create({
+          ...form,
+          unitPrice: parseCurrency(form.unitPrice),
+        });
+        setMessage('Item cadastrado com sucesso.');
+      }
+      resetForm();
       await loadItems();
-      setMessage('Item cadastrado com sucesso.');
+    } catch (error) {
+      setMessage(getErrorMessage(error));
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!window.confirm('Tem certeza que deseja excluir este item?')) return;
+
+    try {
+      await apiClient.items.remove(id);
+      await loadItems();
+      setMessage('Item excluído com sucesso.');
     } catch (error) {
       setMessage(getErrorMessage(error));
     }
@@ -74,7 +112,7 @@ export default function ItemsPage() {
       <div className="items-layout">
         <div className="two-columns">
           <form className="card form-card items-form-card" onSubmit={handleSubmit}>
-            <h2>Novo item</h2>
+            <h2>{editingId ? 'Editar item' : 'Novo item'}</h2>
 
             <label>
               SKU *
@@ -114,34 +152,45 @@ export default function ItemsPage() {
               Ativo
             </label>
 
-            <button type="submit" disabled={loading}>
-              {loading ? 'Salvando...' : 'Salvar item'}
-            </button>
+            <div className="form-actions">
+              <button type="submit" disabled={loading}>
+                {loading ? 'Salvando...' : editingId ? 'Atualizar item' : 'Salvar item'}
+              </button>
+              {editingId && (
+                <button type="button" className="secondary" onClick={resetForm}>
+                  Cancelar
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="card items-list-card">
-          <h2>Itens cadastrados</h2>
-          {items.length === 0 ? (
-            <p className="empty">Nenhum item cadastrado.</p>
-          ) : (
-            <ul className="list items-list">
-              {items.map((item) => (
-                <li key={item.id}>
-                  <div>
-                    <strong>{item.sku}</strong>
-                    <span>{item.name}</span>
-                    <span className="items-price">{formatCurrency(item.unitPrice)}</span>
-                  </div>
-                  <span className={item.active ? 'badge-active' : 'badge-inactive'}>
-                    {item.active ? 'Ativo' : 'Inativo'}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
+            <h2>Itens cadastrados</h2>
+            {items.length === 0 ? (
+              <p className="empty">Nenhum item cadastrado.</p>
+            ) : (
+              <ul className="list items-list">
+                {items.map((item) => (
+                  <li key={item.id}>
+                    <div>
+                      <strong>{item.sku}</strong>
+                      <span>{item.name}</span>
+                      <span className="items-price">{formatCurrency(item.unitPrice)}</span>
+                    </div>
+                    <div className="items-actions">
+                      <span className={item.active ? 'badge-active' : 'badge-inactive'}>
+                        {item.active ? 'Ativo' : 'Inativo'}
+                      </span>
+                      <button className="secondary" onClick={() => startEdit(item)}>Editar</button>
+                      <button className="secondary" onClick={() => handleDelete(item.id)}>Excluir</button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         </div>
       </div>
-    </div>
     </section>
   );
 }
