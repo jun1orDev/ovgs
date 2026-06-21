@@ -1,0 +1,280 @@
+.card {
+  min-height: 190px;
+  padding: 24px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+}
+
+.card h2 {
+  margin: 0 0 12px;
+  font-size: 1.25rem;
+}
+
+.card h3 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+}
+
+.card p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.form-card {
+  display: flex;
+	flex-direction: column;
+  gap: 16px;
+}
+
+.order-form-card,
+.orders-card {
+  margin-top: 24px;
+}
+
+label {
+  display: grid;
+  gap: 8px;
+  color: #334155;
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #0f172a;
+}
+
+textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+button {
+  justify-self: start;
+  padding: 11px 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #2563eb;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: #1d4ed8;
+  box-shadow: 0 12px 30px rgba(37, 99, 235, 0.22);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button.secondary {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+button.secondary:hover:not(:disabled) {
+  background: #cbd5e1;
+  box-shadow: none;
+}
+
+fieldset {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 18px;
+}
+
+legend {
+  padding: 0 8px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.checkbox-row input {
+  width: auto;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+}
+
+.alert {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 16px;
+  background: rgba(254, 242, 242, 0.9);
+  color: #991b1b;
+}
+
+.summary-grid,
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.metric-card,
+.status-card {
+  padding: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.metric-card span,
+.status-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.metric-card strong,
+.status-card strong {
+  font-size: 2rem;
+}
+
+.list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.list li > div {
+  display: grid;
+  gap: 4px;
+}
+
+.list span {
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.status-badge,
+.badge-active,
+.badge-inactive,
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.status-badge {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.badge-active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.badge-inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  background: #eef2ff;
+  color: #3730a3;
+}
+
+.helper-text {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.empty {
+  margin: 0;
+  padding: 20px;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  border-radius: 16px;
+  color: #64748b;
+  text-align: center;
+}
+
+.tabs-card {
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.76);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tab-link {
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #3730a3;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.tab-link.active {
+  background: #2563eb;
+  color: #fff;
+}
+
+.tab-panel {
+  margin-top: 16px;
+}

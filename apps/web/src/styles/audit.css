@@ -1,0 +1,28 @@
+.audit-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.audit-card {
+  padding: 24px;
+}
+
+.audit-list {
+  gap: 10px;
+}
+
+.audit-list li {
+  padding: 14px;
+}
+
+.audit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .audit-layout {
+    grid-template-columns: 1fr;
+  }
+}

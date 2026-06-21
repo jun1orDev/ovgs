@@ -1,0 +1,20 @@
+.cadastros-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.cadastros-intro {
+  max-width: 760px;
+}
+
+.cadastros-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .cadastros-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,29 @@
+.transport-types-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.transport-types-form-card,
+.transport-types-list-card {
+  margin-top: 0;
+}
+
+.transport-types-list {
+  gap: 10px;
+}
+
+.transport-types-list li {
+  padding: 14px;
+}
+
+.transport-types-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .transport-types-layout {
+    grid-template-columns: 1fr;
+  }
+}

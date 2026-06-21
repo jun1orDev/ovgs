@@ -1,0 +1,53 @@
+.monitoring-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.monitoring-card {
+  padding: 24px;
+}
+
+.monitoring-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.monitoring-status-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.monitoring-status-card {
+  padding: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.86);
+}
+
+.monitoring-status-card span {
+  display: block;
+  margin-bottom: 8px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.monitoring-status-card strong {
+  font-size: 1.8rem;
+}
+
+.monitoring-filter {
+  min-width: 220px;
+}
+
+@media (max-width: 900px) {
+  .monitoring-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-status-grid {
+    grid-template-columns: 1fr;
+  }
+}

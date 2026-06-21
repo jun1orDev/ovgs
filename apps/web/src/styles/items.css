@@ -1,0 +1,36 @@
+.items-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.items-form-card,
+.items-list-card {
+  margin-top: 0;
+}
+
+.items-list {
+  gap: 10px;
+}
+
+.items-list li {
+  padding: 14px;
+}
+
+.items-price {
+  display: block;
+  margin-top: 2px;
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.items-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .items-layout {
+    grid-template-columns: 1fr;
+  }
+}

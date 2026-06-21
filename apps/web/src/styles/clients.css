@@ -1,0 +1,34 @@
+.clients-layout {
+  display: grid;
+  gap: 20px;
+}
+
+.clients-form-card,
+.clients-list-card,
+.clients-transport-card {
+  margin-top: 0;
+}
+
+.clients-transport-card {
+  margin-top: 20px;
+}
+
+.clients-list {
+  gap: 10px;
+}
+
+.clients-list li {
+  padding: 14px;
+}
+
+.clients-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 900px) {
+  .clients-layout {
+    grid-template-columns: 1fr;
+  }
+}
