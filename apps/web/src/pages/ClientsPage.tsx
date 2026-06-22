@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { getErrorMessage, optionLabel } from '../lib/format';
+import { formatCpfCnpj, formatPhone, parseCpfCnpj, parsePhone } from '../lib/masks';
 import { SkeletonCard, SkeletonForm, SkeletonList } from '../components/Skeleton';
 import type { Client, TransportType } from '../types/ovgs';
 
@@ -59,9 +60,9 @@ export default function ClientsPage() {
   function startEdit(client: Client) {
     setForm({
       name: client.name,
-      document: client.document ?? '',
+      document: client.document ? formatCpfCnpj(client.document) : '',
       email: client.email ?? '',
-      phone: client.phone ?? '',
+      phone: client.phone ? formatPhone(client.phone) : '',
       active: client.active,
       transportTypeIds: client.authorizedTransport?.map((at) => at.transportTypeId) ?? [],
     });
@@ -73,17 +74,18 @@ export default function ClientsPage() {
     setMessage('');
 
     try {
+      const payload = {
+        ...form,
+        document: parseCpfCnpj(form.document),
+        phone: parsePhone(form.phone),
+        transportTypeIds: form.transportTypeIds,
+      };
+
       if (editingId) {
-        await apiClient.clients.update(editingId, {
-          ...form,
-          transportTypeIds: form.transportTypeIds,
-        });
+        await apiClient.clients.update(editingId, payload);
         setMessage('Cliente atualizado com sucesso.');
       } else {
-        await apiClient.clients.create({
-          ...form,
-          transportTypeIds: form.transportTypeIds,
-        });
+        await apiClient.clients.create(payload);
         setMessage('Cliente cadastrado com sucesso.');
       }
       resetForm();
@@ -154,11 +156,12 @@ export default function ClientsPage() {
             </label>
 
             <label>
-              Documento
+              Documento (CPF/CNPJ)
               <input
                 value={form.document}
-                onChange={(event) => setForm({ ...form, document: event.target.value })}
-                maxLength={30}
+                onChange={(event) => setForm({ ...form, document: formatCpfCnpj(event.target.value) })}
+                maxLength={18}
+                placeholder="000.000.000-00 ou 00.000.000/0000-00"
               />
             </label>
 
@@ -175,8 +178,9 @@ export default function ClientsPage() {
               Telefone
               <input
                 value={form.phone}
-                onChange={(event) => setForm({ ...form, phone: event.target.value })}
-                maxLength={30}
+                onChange={(event) => setForm({ ...form, phone: formatPhone(event.target.value) })}
+                maxLength={15}
+                placeholder="(00) 0000-0000 ou (00) 00000-0000"
               />
             </label>
 
