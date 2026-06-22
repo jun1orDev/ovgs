@@ -2,12 +2,21 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
 
+function normalizeSku(sku: string): string {
+	const trimmed = sku.trim().toUpperCase();
+	return trimmed.startsWith('SKU-') ? trimmed : `SKU-${trimmed}`;
+}
+
 @Injectable()
 export class ItemsService {
 	constructor(private readonly prisma: PrismaService) { }
 
 	async create(dto: CreateItemDto) {
-		return this.prisma.item.create({ data: dto });
+		const normalizedDto = {
+			...dto,
+			sku: normalizeSku(dto.sku),
+		};
+		return this.prisma.item.create({ data: normalizedDto });
 	}
 
 	async findAll(active?: boolean) {
@@ -23,7 +32,12 @@ export class ItemsService {
 
 	async update(id: string, dto: UpdateItemDto) {
 		await this.findOrThrow(id);
-		return this.prisma.item.update({ where: { id }, data: dto });
+
+		const normalizedDto = dto.sku
+			? { ...dto, sku: normalizeSku(dto.sku) }
+			: dto;
+
+		return this.prisma.item.update({ where: { id }, data: normalizedDto });
 	}
 
 	async remove(id: string) {

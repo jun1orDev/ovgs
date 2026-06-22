@@ -18,6 +18,11 @@ function parseCurrency(value: string): number {
   return Number.isNaN(numericValue) ? 0 : numericValue;
 }
 
+function normalizeSkuInput(value: string): string {
+  const upper = value.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+  return upper.startsWith('SKU-') ? upper : `SKU-${upper}`;
+}
+
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
@@ -54,7 +59,7 @@ export default function ItemsPage() {
   function startEdit(item: Item) {
     const unitPriceNumber = typeof item.unitPrice === 'number' ? item.unitPrice : Number(item.unitPrice ?? 0);
     setForm({
-      sku: item.sku,
+      sku: normalizeSkuInput(item.sku),
       name: item.name,
       description: item.description ?? '',
       unitPrice: formatCurrencyInput(String(unitPriceNumber * 100)),
@@ -118,7 +123,7 @@ export default function ItemsPage() {
               SKU *
               <input
                 value={form.sku}
-                onChange={(event) => setForm({ ...form, sku: event.target.value })}
+                onChange={(event) => setForm({ ...form, sku: normalizeSkuInput(event.target.value) })}
                 required
                 maxLength={50}
               />
