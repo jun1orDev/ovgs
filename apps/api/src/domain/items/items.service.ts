@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { CreateItemDto, UpdateItemDto } from './dto/item.dto';
 
@@ -42,6 +42,17 @@ export class ItemsService {
 
 	async remove(id: string) {
 		await this.findOrThrow(id);
+
+		const salesOrderItemsCount = await this.prisma.salesOrderItem.count({
+			where: { itemId: id },
+		});
+
+		if (salesOrderItemsCount > 0) {
+			throw new BadRequestException(
+				'Não é possível excluir o item pois ele está sendo usado em ordens de venda.',
+			);
+		}
+
 		return this.prisma.item.delete({ where: { id } });
 	}
 

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { CreateTransportTypeDto, UpdateTransportTypeDto } from './dto/transport-type.dto';
 
@@ -28,6 +28,24 @@ export class TransportTypesService {
 
 	async remove(id: string) {
 		await this.findOrThrow(id);
+
+		const [salesOrdersCount, clientTransportCount] = await Promise.all([
+			this.prisma.salesOrder.count({ where: { transportTypeId: id } }),
+			this.prisma.clientTransportType.count({ where: { transportTypeId: id } }),
+		]);
+
+		if (salesOrdersCount > 0) {
+			throw new BadRequestException(
+				'Não é possível excluir o tipo de transporte pois existem ordens de venda associadas a ele.',
+			);
+		}
+
+		if (clientTransportCount > 0) {
+			throw new BadRequestException(
+				'Não é possível excluir o tipo de transporte pois existem clientes autorizados a usá-lo.',
+			);
+		}
+
 		return this.prisma.transportType.delete({ where: { id } });
 	}
 

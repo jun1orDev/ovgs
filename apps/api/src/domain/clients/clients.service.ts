@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../../infrastructure/prisma/prisma.service';
 import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 
@@ -74,6 +74,16 @@ export class ClientsService {
 
 	async remove(id: string) {
 		await this.findOrThrow(id);
+
+		const salesOrdersCount = await this.prisma.salesOrder.count({
+			where: { clientId: id },
+		});
+
+		if (salesOrdersCount > 0) {
+			throw new BadRequestException(
+				'Não é possível excluir o cliente pois existem ordens de venda associadas a ele.',
+			);
+		}
 
 		return this.prisma.client.delete({ where: { id } });
 	}
