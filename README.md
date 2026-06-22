@@ -34,9 +34,7 @@ cp apps/api/.env.example apps/api/.env
 npm run compose:up
 
 # Gera o cliente Prisma, aplica as migrations e popula o banco com dados iniciais.
-npm run prisma:generate
-npm run prisma:migrate
-npm run prisma:seed
+npm run prisma:generate && npm run prisma:migrate && npm run prisma:seed
 
 # Inicia API NestJS e frontend React/Vite em paralelo.
 npm run dev
@@ -92,7 +90,7 @@ O projeto está deployado no Render.com com os seguintes serviços:
 | **API (Swagger)** | <https://ovgs.onrender.com/api/docs> | Documentação OpenAPI/Swagger |
 | **Banco (PgHero)** | <https://pghero-dpg-d8s5jgr6sc1c73c2k120-a.onrender.com> | Monitoramento do PostgreSQL |
 
-![Serviços no Render.com](https://via.placeholder.com/800x400/1e293b/ffffff?text=Render.com+Services%3A+Frontend%2C+API%2C+PostgreSQL)
+![Serviços no Render.com](./services.png)
 
 > **Nota**: O plano gratuito do Render pode hibernar serviços após 15 min de inatividade. A primeira requisição pode levar 30-60s para "acordar" o serviço.
 
