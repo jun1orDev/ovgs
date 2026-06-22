@@ -65,6 +65,21 @@ export class ListSalesOrdersQueryDto {
 	@IsDateString()
 	date?: string;
 
+	@ApiPropertyOptional({ example: '2026-06-01', description: 'Data inicial do período' })
+	@IsOptional()
+	@IsDateString()
+	dateFrom?: string;
+
+	@ApiPropertyOptional({ example: '2026-06-30', description: 'Data final do período' })
+	@IsOptional()
+	@IsDateString()
+	dateTo?: string;
+
+	@ApiPropertyOptional({ enum: ['createdAt', 'deliveryDate'], description: 'Campo de data para filtrar' })
+	@IsOptional()
+	@IsEnum(['createdAt', 'deliveryDate'])
+	dateField?: 'createdAt' | 'deliveryDate';
+
 	@ApiPropertyOptional({ example: 1, default: 1 })
 	@IsOptional()
 	@Type(() => Number)

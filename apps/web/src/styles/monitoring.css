@@ -7,6 +7,41 @@
   padding: 24px;
 }
 
+.monitoring-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+  padding: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 16px;
+  background: rgba(248, 250, 252, 0.86);
+}
+
+.filter-group {
+  display: grid;
+  gap: 6px;
+}
+
+.filter-group label {
+  display: grid;
+  gap: 6px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.filter-group select,
+.filter-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.45);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
 .monitoring-summary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -42,12 +77,31 @@
   min-width: 220px;
 }
 
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+.pagination-info {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 900px) {
   .monitoring-layout {
     grid-template-columns: 1fr;
   }
 
   .monitoring-status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .monitoring-filters {
     grid-template-columns: 1fr;
   }
 }

@@ -213,15 +213,31 @@ export class SalesOrdersService {
 			where.transportTypeId = query.transportTypeId;
 		}
 
-		if (query.date) {
+		// Filtros de data avançados
+		const dateField = query.dateField ?? 'createdAt';
+		const dateConditions: Record<string, unknown> = {};
+
+		if (query.dateFrom) {
+			dateConditions.gte = new Date(query.dateFrom);
+		}
+
+		if (query.dateTo) {
+			const endDate = new Date(query.dateTo);
+			endDate.setHours(23, 59, 59, 999);
+			dateConditions.lte = endDate;
+		}
+
+		// Mantém compatibilidade com o filtro 'date' antigo (filtra por dia)
+		if (query.date && !query.dateFrom && !query.dateTo) {
 			const start = new Date(query.date);
 			const end = new Date(start);
 			end.setDate(end.getDate() + 1);
+			dateConditions.gte = start;
+			dateConditions.lt = end;
+		}
 
-			where.OR = [
-				{ deliveryDate: { gte: start, lt: end } },
-				{ createdAt: { gte: start, lt: end } },
-			];
+		if (Object.keys(dateConditions).length > 0) {
+			where[dateField] = dateConditions;
 		}
 
 		return where;

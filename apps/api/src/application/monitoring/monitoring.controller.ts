@@ -8,8 +8,13 @@ import { SalesOrdersService } from '../../domain/sales-orders/sales-orders.servi
 export class MonitoringController {
 	constructor(private readonly salesOrdersService: SalesOrdersService) { }
 
+	@Get('summary')
+	findSummary(@Query() query: ListSalesOrdersQueryDto) {
+		return this.salesOrdersService.findMonitoringSummary(query);
+	}
+
 	@Get()
 	findAll(@Query() query: ListSalesOrdersQueryDto) {
-		return this.salesOrdersService.findMonitoringSummary(query);
+		return this.salesOrdersService.findAll(query);
 	}
 }

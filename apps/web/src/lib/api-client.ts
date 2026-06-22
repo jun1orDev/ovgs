@@ -101,7 +101,8 @@ export const apiClient = {
 	},
 
 	monitoring: {
-		summary: (query?: Record<string, string | number | undefined>) => request<MonitoringSummary>(`/monitoring/sales-orders${toQueryString(query)}`),
+		summary: (query?: Record<string, string | number | undefined>) => request<MonitoringSummary>(`/monitoring/sales-orders/summary${toQueryString(query)}`),
+		list: (query?: Record<string, string | number | undefined>) => request<PaginatedResponse<SalesOrder>>(`/monitoring/sales-orders${toQueryString(query)}`),
 	},
 
 	audit: {
