@@ -1,12 +1,14 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { getErrorMessage, optionLabel } from '../lib/format';
+import { SkeletonCard, SkeletonForm, SkeletonList } from '../components/Skeleton';
 import type { Client, TransportType } from '../types/ovgs';
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -19,7 +21,6 @@ export default function ClientsPage() {
   });
 
   async function loadClients() {
-    setLoading(true);
     try {
       const [clientData, transportData] = await Promise.all([
         apiClient.clients.list(),
@@ -29,13 +30,18 @@ export default function ClientsPage() {
       setTransportTypes(transportData);
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadClients();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadClients();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
   }, []);
 
   function resetForm() {
@@ -106,6 +112,21 @@ export default function ClientsPage() {
         ? current.transportTypeIds.filter((id) => id !== transportTypeId)
         : [...current.transportTypeIds, transportTypeId],
     }));
+  }
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Clientes</h1>
+          <p>Cadastre clientes e defina quais tipos de transporte estão autorizados para uso em ordens de venda.</p>
+        </div>
+
+        <SkeletonForm fields={6} className="clients-form-card" />
+        <SkeletonCard count={1} className="clients-list-card" />
+        <SkeletonList count={5} />
+      </section>
+    );
   }
 
   return (

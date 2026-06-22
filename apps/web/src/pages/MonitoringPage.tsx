@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { formatCurrency, formatDateTime, getErrorMessage, statusLabel, optionLabel } from '../lib/format';
+import { SkeletonCard, SkeletonMetrics, SkeletonTable, SkeletonForm } from '../components/Skeleton';
 import type { Client, MonitoringSummary, OrderStatus, PaginatedResponse, SalesOrder, TransportType } from '../types/ovgs';
 
 const statusOptions: OrderStatus[] = ['CRIADA', 'PLANEJADA', 'AGENDADA', 'EM_TRANSPORTE', 'ENTREGUE'];
@@ -11,6 +12,7 @@ export default function MonitoringPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
   const [message, setMessage] = useState('');
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
   const [clientFilter, setClientFilter] = useState<string>('');
@@ -62,7 +64,16 @@ export default function MonitoringPage() {
   }
 
   useEffect(() => {
-    loadDependencies();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadDependencies();
+      await loadSummary();
+      await loadOrders();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
   }, []);
 
   useEffect(() => {
@@ -84,6 +95,22 @@ export default function MonitoringPage() {
 
   function orderTotal(order: SalesOrder) {
     return order.items.reduce((sum, item) => sum + Number(item.unitPrice ?? 0) * item.quantity, 0);
+  }
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Monitoramento operacional</h1>
+          <p>Visualize o total de ordens e a distribuição por status para acompanhamento operacional.</p>
+        </div>
+
+        <SkeletonMetrics count={4} />
+        <SkeletonCard count={1} className="monitoring-card" />
+        <SkeletonForm fields={6} />
+        <SkeletonTable rows={5} columns={6} />
+      </section>
+    );
   }
 
   return (

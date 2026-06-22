@@ -1,27 +1,47 @@
 import { useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { formatDateTime, getErrorMessage } from '../lib/format';
+import { SkeletonCard, SkeletonList } from '../components/Skeleton';
 import type { AuditEvent } from '../types/ovgs';
 
 export default function AuditEventsPage() {
   const [events, setEvents] = useState<AuditEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState('');
 
   async function loadEvents() {
-    setLoading(true);
     try {
       setEvents(await apiClient.audit.list('SalesOrder'));
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadEvents();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadEvents();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
   }, []);
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Auditoria</h1>
+          <p>Acompanhe eventos relevantes de criação, mudança de status, transporte e agendamento.</p>
+        </div>
+
+        <SkeletonCard count={1} className="audit-card" />
+        <SkeletonList count={5} />
+      </section>
+    );
+  }
 
   return (
     <section className="page-shell">

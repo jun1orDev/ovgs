@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { formatCurrency, getErrorMessage } from '../lib/format';
+import { SkeletonCard, SkeletonForm, SkeletonList } from '../components/Skeleton';
 import type { Item } from '../types/ovgs';
 
 function formatCurrencyInput(value: string): string {
@@ -25,7 +26,8 @@ function normalizeSkuInput(value: string): string {
 
 export default function ItemsPage() {
   const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -37,18 +39,22 @@ export default function ItemsPage() {
   });
 
   async function loadItems() {
-    setLoading(true);
     try {
       setItems(await apiClient.items.list());
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadItems();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadItems();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
   }, []);
 
   function resetForm() {
@@ -103,6 +109,21 @@ export default function ItemsPage() {
     } catch (error) {
       setMessage(getErrorMessage(error));
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Itens</h1>
+          <p>Cadastre os itens que poderão compor uma ordem de venda.</p>
+        </div>
+
+        <SkeletonForm fields={5} className="items-form-card" />
+        <SkeletonCard count={1} className="items-list-card" />
+        <SkeletonList count={5} />
+      </section>
+    );
   }
 
   return (

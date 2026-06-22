@@ -1,6 +1,7 @@
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { canTransition, formatCurrency, formatDateTime, getErrorMessage, optionLabel, statusLabel } from '../lib/format';
+import { SkeletonCard, SkeletonList, SkeletonForm, SkeletonMetrics } from '../components/Skeleton';
 import type { Client, CreateSalesOrderDto, Item, OrderStatus, RescheduleSalesOrderDto, SalesOrder, ScheduleSalesOrderDto, TransportType } from '../types/ovgs';
 
 type OrderLine = {
@@ -19,7 +20,8 @@ export default function SalesOrdersPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
   const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [selectedOrder, setSelectedOrder] = useState<SalesOrder | null>(null);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | ''>('');
@@ -52,7 +54,6 @@ export default function SalesOrdersPage() {
   }, [clients, form.clientId, transportTypes]);
 
   async function loadDependencies() {
-    setLoading(true);
     try {
       const [clientsData, transportData, itemsData] = await Promise.all([
         apiClient.clients.list(),
@@ -64,25 +65,31 @@ export default function SalesOrdersPage() {
       setItems(itemsData);
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   async function loadOrders() {
-    setLoading(true);
     try {
       const response = await apiClient.salesOrders.list(statusFilter ? { status: statusFilter } : undefined);
       setOrders(response.data);
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadDependencies();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadDependencies();
+      await loadOrders();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
+  }, []);
+
+  useEffect(() => {
     loadOrders();
   }, [statusFilter]);
 
@@ -171,6 +178,22 @@ export default function SalesOrdersPage() {
 
   function orderTotal(order: SalesOrder) {
     return order.items.reduce((sum, item) => sum + Number(item.unitPrice ?? 0) * item.quantity, 0);
+  }
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Ordens de venda</h1>
+          <p>Crie ordens, acompanhe status, avance etapas e visualize o valor total por ordem.</p>
+        </div>
+
+        <SkeletonMetrics count={2} />
+        <SkeletonForm fields={4} className="order-form-card" />
+        <SkeletonCard count={1} className="orders-card" />
+        <SkeletonList count={5} />
+      </section>
+    );
   }
 
   return (

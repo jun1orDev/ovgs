@@ -1,11 +1,13 @@
 import { FormEvent, useEffect, useState } from 'react';
 import { apiClient } from '../lib/api-client';
 import { getErrorMessage } from '../lib/format';
+import { SkeletonCard, SkeletonForm, SkeletonList } from '../components/Skeleton';
 import type { TransportType } from '../types/ovgs';
 
 export default function TransportTypesPage() {
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -15,18 +17,22 @@ export default function TransportTypesPage() {
   });
 
   async function loadTransportTypes() {
-    setLoading(true);
     try {
       setTransportTypes(await apiClient.transportTypes.list());
     } catch (error) {
       setMessage(getErrorMessage(error));
-    } finally {
-      setLoading(false);
     }
   }
 
   useEffect(() => {
-    loadTransportTypes();
+    let mounted = true;
+    async function loadInitialData() {
+      setInitialLoading(true);
+      await loadTransportTypes();
+      if (mounted) setInitialLoading(false);
+    }
+    loadInitialData();
+    return () => { mounted = false; };
   }, []);
 
   function resetForm() {
@@ -72,6 +78,21 @@ export default function TransportTypesPage() {
     } catch (error) {
       setMessage(getErrorMessage(error));
     }
+  }
+
+  if (initialLoading) {
+    return (
+      <section className="page-shell">
+        <div className="section-heading">
+          <h1>Tipos de transporte</h1>
+          <p>Defina os tipos de transporte disponíveis, como caminhão, carreta e bi-truck.</p>
+        </div>
+
+        <SkeletonForm fields={4} className="transport-types-form-card" />
+        <SkeletonCard count={1} className="transport-types-list-card" />
+        <SkeletonList count={5} />
+      </section>
+    );
   }
 
   return (

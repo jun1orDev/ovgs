@@ -158,3 +158,5 @@ O projeto está deployado no Render.com com os seguintes serviços:
 - **Portas não padrão** (API 3101, DB 15432) evitam conflitos em máquina de dev, já documentado.
 - **CSS-in-JS não usado**: opção por CSS Modules/arquivos estáticos para simplicidade e zero runtime; perde escopo dinâmico de tema, mas ganha performance e DX.
 - **Auditoria síncrona**: `AuditService.create` roda na mesma transação da operação; em alto volume, mover para outbox/async evitaria latência extra.
+
+# 🧑🏻‍💻 Obrigado!
